@@ -7,6 +7,10 @@ A lightweight addon for JetFormBuilder 3+ which add attributes for frontend macr
 - **Description:** it is used to display or save the names of the selected options in the Checkbox Field, Radio Field, Select Field blocks.
 - **Example:** `<!--JFB_FIELD::check_box_name(optionLabel)-->` (for field description, html block or paragraph), `%check_box_name(optionLabel)%` (for calculated field or in Default Value option)
 
+### `rawCalc`
+- **Description:** It is used to display text values that are passed in the data-calculated attribute in the Checkbox Field, Radio Field, Select Field blocks.
+- **Example:** `<!--JFB_FIELD::check_box_name(optionLabel)-->` (for field description, html block or paragraph), `%check_box_name(optionLabel)%` (for calculated field or in Default Value option)
+
 ## Quick Start
 1. Copy the blocks found below
 ```html
