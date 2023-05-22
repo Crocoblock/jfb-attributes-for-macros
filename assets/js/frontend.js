@@ -7,6 +7,7 @@
 
 		const {
 			      BaseHtmlAttr = () => {},
+			      CalculatedFormula,
 		      } = JetFormBuilderAbstract;
 
 		const {
@@ -250,5 +251,129 @@
 				return types;
 			},
 		);
+
+		/**
+		 * @param result
+		 * @param fieldName {String}
+		 * @param params {Array}
+		 * @param formula {CalculatedFormula}
+		 */
+		function getExternalMacro( result, fieldName, params, formula ) {
+			const parts = fieldName.match( /^(\d+)::(.+)/ );
+
+			if ( !Array.isArray( parts ) || !Number.isInteger( +parts[ 1 ] ) ) {
+				return result;
+			}
+			const formId = +parts[ 1 ];
+			const macro  = parts[ 2 ];
+
+			const innerFormula     = new CalculatedFormula();
+			innerFormula.setResult = () => formula.setResult();
+
+			if ( JetFormBuilder.hasOwnProperty( formId ) ) {
+				innerFormula.root = JetFormBuilder[ formId ];
+
+				return innerFormula.observeMacro( macro );
+			}
+
+			addAction(
+				'jet.fb.observe.after',
+				'jfb-attributes-for-macros/add-external-namespace-by-form-id',
+				/**
+				 * @param observable {Observable}
+				 */
+				function ( observable ) {
+					if ( observable.parent ||
+						observable.getSubmit().getFormId() !== formId
+					) {
+						return;
+					}
+					innerFormula.root = JetFormBuilder[ formId ];
+					formula.setResult();
+				},
+			);
+
+			let hasObserved = false;
+			let response;
+
+			return () => {
+				if ( !innerFormula.root ) {
+					return 0;
+				}
+				if ( !hasObserved ) {
+					hasObserved = true;
+					response    = innerFormula.observeMacro( macro );
+				}
+
+				return 'function' === typeof response ? response() : response;
+			};
+		}
+
+		addFilter(
+			'jet.fb.custom.formula.macro',
+			'jfb-attributes-for-macros/add-external-namespace-by-form-id',
+			getExternalMacro,
+		);
+
+		const onPageLoad = function () {
+			const {
+				      iterateComments,
+				      observeComment,
+			      } = JetFormBuilderFunctions;
+
+			const {
+				      addAction,
+			      } = JetPlugins.hooks;
+
+			const regexp = /JFB_FIELD::(\d+)/;
+
+			function* iterateExtraComments( rootNode ) {
+				const acceptCallback = node => {
+					return (
+						!node.jfbObserved && regexp.test( node.textContent )
+					);
+				};
+
+				yield* iterateComments( rootNode, acceptCallback );
+			}
+
+			for (
+				const comment of iterateExtraComments( document.body )
+				) {
+				let [ , formId ] = comment.textContent.match( regexp );
+
+				// to int
+				formId = +formId;
+
+				if ( JetFormBuilder.hasOwnProperty( formId ) ) {
+					observeComment( comment, JetFormBuilder[ formId ] );
+				}
+				else {
+					addAction(
+						'jet.fb.observe.after',
+						'jfb-attributes-for-macros/add-external-namespace-by-form-id',
+						/**
+						 * @param observable {Observable}
+						 */
+						function ( observable ) {
+							if ( observable.parent ||
+								observable.getSubmit().getFormId() !== formId ||
+								comment.jfbObserved
+							) {
+								return;
+							}
+							observeComment( comment, JetFormBuilder[ formId ] );
+						},
+					);
+				}
+			}
+		};
+
+		if ( document.readyState !== 'loading' ) {
+			onPageLoad();
+		}
+		else {
+			document.addEventListener( 'DOMContentLoaded', onPageLoad );
+		}
 	}
 )();
