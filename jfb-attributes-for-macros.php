@@ -2,7 +2,7 @@
 /**
  * Plugin Name: JetFormBuilder - additional attributes
  * Description: A lightweight addon for JetFormBuilder 3+ which add attributes for frontend macros
- * Version:     1.0.0
+ * Version:     1.0.1
  * Author:      Crocoblock
  * Author URI:  https://crocoblock.com/
  * Text Domain: jfb-attributes-for-macros
@@ -18,7 +18,7 @@ if ( ! defined( 'WPINC' ) ) {
 
 const JET_FB_ATTRIBUTES_FOR_MACROS_SLUG = 'jfb-attributes-for-macros';
 
-define( 'JET_FB_ATTRIBUTES_FOR_MACROS_VERSION', '1.0.0' );
+define( 'JET_FB_ATTRIBUTES_FOR_MACROS_VERSION', '1.0.1' );
 
 define( 'JET_FB_ATTRIBUTES_FOR_MACROS__FILE__', __FILE__ );
 define( 'JET_FB_ATTRIBUTES_FOR_MACROS_PLUGIN_BASE', plugin_basename( __FILE__ ) );
@@ -50,4 +50,3 @@ add_action(
 	},
 	100
 );
-
