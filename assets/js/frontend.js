@@ -239,6 +239,63 @@
 
 		RawCalculateAttr.prototype = Object.create( BaseHtmlAttr.prototype );
 
+		function AppointmentCountAttr() {
+			BaseHtmlAttr.call( this );
+
+			this.attrName = 'appointmentCount';
+
+			this.isSupported = function ( input ) {
+				if ( ! input.nodes.length ) {
+					return false;
+				}
+
+				return ! ! input.nodes[0].closest( '.field-type-appointment-date' );
+			};
+
+			this.updateAttr = function () {
+				let { current } = this.input.value;
+
+				if ( isEmpty( current ) ) {
+					this.value.current = 0;
+
+					return;
+				}
+
+				const callback = this.getUpdateAttrCallback();
+
+				this.value.current = callback.call( this );
+			};
+
+			this.getUpdateAttrCallback = function () {
+				return this.getAppCount;
+			};
+
+			this.getAppCount = function () {
+				const { current } = this.input.value;
+
+				try {
+					return JSON.parse( current ).length || 0;
+				} catch {
+					return 0;
+				}
+			};
+
+			this.addWatcherAttr = function () {
+				this.input.value.watch( () => this.updateAttr() );
+			};
+
+			this.setInput = function ( input ) {
+				BaseHtmlAttr.prototype.setInput.call( this, input );
+
+				const [ node ] = input.nodes;
+
+				this.inputType = node.type;
+				this.separator = separator;
+			};
+		}
+
+		AppointmentCountAttr.prototype = Object.create( BaseHtmlAttr.prototype );
+
 		addFilter(
 			'jet.fb.input.html.attrs',
 			'jfb-attributes-for-macros/add-label-separator',
@@ -246,6 +303,7 @@
 				types.push(
 					OptionsLabelAttr,
 					RawCalculateAttr,
+					AppointmentCountAttr,
 				);
 
 				return types;
