@@ -239,17 +239,13 @@
 
 		RawCalculateAttr.prototype = Object.create( BaseHtmlAttr.prototype );
 
-		function AppointmentCountAttr() {
+		function ItemsCountAttr() {
 			BaseHtmlAttr.call( this );
 
-			this.attrName = 'appointmentCount';
+			this.attrName = 'itemsCount';
 
 			this.isSupported = function ( input ) {
-				if ( ! input.nodes.length ) {
-					return false;
-				}
-
-				return ! ! input.nodes[0].closest( '.field-type-appointment-date' );
+				return true;
 			};
 
 			this.updateAttr = function () {
@@ -267,16 +263,16 @@
 			};
 
 			this.getUpdateAttrCallback = function () {
-				return this.getAppCount;
+				return this.getItemsCount;
 			};
 
-			this.getAppCount = function () {
+			this.getItemsCount = function () {
 				const { current } = this.input.value;
 
 				try {
 					return JSON.parse( current ).length || 0;
 				} catch {
-					return 0;
+					return current.length || 0;
 				}
 			};
 
@@ -294,7 +290,16 @@
 			};
 		}
 
-		AppointmentCountAttr.prototype = Object.create( BaseHtmlAttr.prototype );
+		ItemsCountAttr.prototype = Object.create( BaseHtmlAttr.prototype );
+
+		function AppointmentCountAttr() {
+			ItemsCountAttr.call( this );
+
+			this.attrName = 'appointmentCount';
+			
+		}
+
+		AppointmentCountAttr.prototype = Object.create( ItemsCountAttr.prototype );
 
 		addFilter(
 			'jet.fb.input.html.attrs',
@@ -303,6 +308,7 @@
 				types.push(
 					OptionsLabelAttr,
 					RawCalculateAttr,
+					ItemsCountAttr,
 					AppointmentCountAttr,
 				);
 
