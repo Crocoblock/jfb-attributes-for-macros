@@ -239,6 +239,68 @@
 
 		RawCalculateAttr.prototype = Object.create( BaseHtmlAttr.prototype );
 
+		function ItemsCountAttr() {
+			BaseHtmlAttr.call( this );
+
+			this.attrName = 'jsonCount';
+
+			this.isSupported = function ( input ) {
+				return true;
+			};
+
+			this.updateAttr = function () {
+				let { current } = this.input.value;
+
+				if ( isEmpty( current ) ) {
+					this.value.current = 0;
+
+					return;
+				}
+
+				const callback = this.getUpdateAttrCallback();
+
+				this.value.current = callback.call( this );
+			};
+
+			this.getUpdateAttrCallback = function () {
+				return this.getItemsCount;
+			};
+
+			this.getItemsCount = function () {
+				const { current } = this.input.value;
+
+				try {
+					return JSON.parse( current ).length || 0;
+				} catch {
+					return current.length || 0;
+				}
+			};
+
+			this.addWatcherAttr = function () {
+				this.input.value.watch( () => this.updateAttr() );
+			};
+
+			this.setInput = function ( input ) {
+				BaseHtmlAttr.prototype.setInput.call( this, input );
+
+				const [ node ] = input.nodes;
+
+				this.inputType = node.type;
+				this.separator = separator;
+			};
+		}
+
+		ItemsCountAttr.prototype = Object.create( BaseHtmlAttr.prototype );
+
+		function AppointmentCountAttr() {
+			ItemsCountAttr.call( this );
+
+			this.attrName = 'appointmentCount';
+			
+		}
+
+		AppointmentCountAttr.prototype = Object.create( ItemsCountAttr.prototype );
+
 		addFilter(
 			'jet.fb.input.html.attrs',
 			'jfb-attributes-for-macros/add-label-separator',
@@ -246,6 +308,8 @@
 				types.push(
 					OptionsLabelAttr,
 					RawCalculateAttr,
+					ItemsCountAttr,
+					AppointmentCountAttr,
 				);
 
 				return types;
