@@ -242,7 +242,7 @@
 		function ItemsCountAttr() {
 			BaseHtmlAttr.call( this );
 
-			this.attrName = 'itemsCount';
+			this.attrName = 'jsonCount';
 
 			this.isSupported = function ( input ) {
 				return true;
