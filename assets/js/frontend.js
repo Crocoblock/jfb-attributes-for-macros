@@ -301,6 +301,83 @@
 
 		AppointmentCountAttr.prototype = Object.create( ItemsCountAttr.prototype );
 
+		function AppointmentStartTimeAttr() {
+			BaseHtmlAttr.call( this );
+
+			this.defaultValue = '00:00';
+
+			this.attrName = 'appointmentStartTime';
+
+			this.isSupported = function ( input ) {
+				return input?.nodes.length && input?.nodes[0].closest( '.appointment-calendar' );
+			};
+
+			this.updateAttr = function () {
+				let { current } = this.input.value;
+
+				if ( isEmpty( current ) ) {
+					this.value.current = this.defaultValue;
+
+					return;
+				}
+
+				const callback = this.getUpdateAttrCallback();
+
+				this.value.current = callback.call( this );
+			};
+
+			this.getUpdateAttrCallback = function () {
+				return this.callbackFunction;
+			};
+
+			this.callbackFunction = function () {
+				return this.getTime( 0 );
+			}
+
+			this.getTimeArray = function ( appointment ) {
+				return appointment.length === 1 ? ( appointment[0]?.friendlyTime.split( '-' ) || [] ) : [];
+			}
+
+			this.getTime = function ( n ) {
+				const { current } = this.input.value;
+
+				try {
+					const appointment = JSON.parse( current );
+
+					return this.getTimeArray( appointment )[ n ] || this.defaultValue;
+				} catch {
+					return this.defaultValue;
+				}
+			};
+
+			this.addWatcherAttr = function () {
+				this.input.value.watch( () => this.updateAttr() );
+			};
+
+			this.setInput = function ( input ) {
+				BaseHtmlAttr.prototype.setInput.call( this, input );
+
+				const [ node ] = input.nodes;
+
+				this.inputType = node.type;
+				this.separator = separator;
+			};
+		}
+
+		AppointmentStartTimeAttr.prototype = Object.create( BaseHtmlAttr.prototype );
+
+		function AppointmentEndTimeAttr() {
+			AppointmentStartTimeAttr.call( this );
+
+			this.attrName = 'appointmentEndTime';
+
+			this.callbackFunction = function () {
+				return this.getTime( 1 );
+			}
+		}
+
+		AppointmentEndTimeAttr.prototype = Object.create( BaseHtmlAttr.prototype );
+
 		addFilter(
 			'jet.fb.input.html.attrs',
 			'jfb-attributes-for-macros/add-label-separator',
@@ -310,6 +387,8 @@
 					RawCalculateAttr,
 					ItemsCountAttr,
 					AppointmentCountAttr,
+					AppointmentStartTimeAttr,
+					AppointmentEndTimeAttr,
 				);
 
 				return types;
