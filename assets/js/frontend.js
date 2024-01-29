@@ -82,11 +82,11 @@
 
 				for ( const currentValue of current ) {
 					labels.push(
-						node.querySelector( `[value="${ currentValue }"]` ).innerHTML,
+						node.querySelector( `[value="${ currentValue }"]` )?.innerHTML,
 					);
 				}
 
-				return labels.join( this.separator );
+				return labels.filter( Boolean ).join( this.separator );
 			};
 
 			this.getRadioLabel = function () {
@@ -188,10 +188,19 @@
 				const { current } = this.input.value;
 				const [ node ]    = this.input.nodes;
 
+				if ( !current ) {
+					return [];
+				}
+
 				for ( const currentValue of current ) {
 					const option = node.querySelector(
 						`[value="${ currentValue }"]`,
 					);
+
+					if ( !option ) {
+						continue;
+					}
+
 					values.push( option.dataset?.calculate ?? option.value );
 				}
 
