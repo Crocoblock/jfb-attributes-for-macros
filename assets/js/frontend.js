@@ -335,7 +335,7 @@
 			}
 
 			this.getTimeArray = function ( appointment ) {
-				return appointment.length === 1 ? ( appointment[0]?.friendlyTime.split( '-' ) || [] ) : [];
+				return appointment.length >= 1 ? ( appointment[0]?.friendlyTime.split( '-' ) || [] ) : [];
 			}
 
 			this.getTime = function ( n ) {
