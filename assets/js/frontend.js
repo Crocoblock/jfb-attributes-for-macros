@@ -378,6 +378,71 @@
 
 		AppointmentEndTimeAttr.prototype = Object.create( BaseHtmlAttr.prototype );
 
+		function AppointmentDurationAttr() {
+			BaseHtmlAttr.call( this );
+
+			this.defaultValue = '0';
+
+			this.attrName = 'appointmentDuration';
+
+			this.isSupported = function ( input ) {
+				return input?.nodes.length && input?.nodes[0].closest( '.appointment-calendar' );
+			};
+
+			this.updateAttr = function () {
+				let { current } = this.input.value;
+
+				if ( isEmpty( current ) ) {
+					this.value.current = this.defaultValue;
+
+					return;
+				}
+
+				const callback = this.getUpdateAttrCallback();
+
+				this.value.current = callback.call( this );
+			};
+
+			this.getUpdateAttrCallback = function () {
+				return this.callbackFunction;
+			};
+
+			this.callbackFunction = function () {
+				return this.getResult();
+			}
+
+			this.getDuration = function ( appointment ) {
+				return appointment.length >= 1 ? ( appointment[0].slotEnd - appointment[0].slot ) : false;
+			}
+
+			this.getResult = function () {
+				const { current } = this.input.value;
+
+				try {
+					const appointment = JSON.parse( current );
+
+					return this.getDuration( appointment ) || this.defaultValue;
+				} catch {
+					return this.defaultValue;
+				}
+			};
+
+			this.addWatcherAttr = function () {
+				this.input.value.watch( () => this.updateAttr() );
+			};
+
+			this.setInput = function ( input ) {
+				BaseHtmlAttr.prototype.setInput.call( this, input );
+
+				const [ node ] = input.nodes;
+
+				this.inputType = node.type;
+				this.separator = separator;
+			};
+		}
+
+		AppointmentDurationAttr.prototype = Object.create( BaseHtmlAttr.prototype );
+					
 		addFilter(
 			'jet.fb.input.html.attrs',
 			'jfb-attributes-for-macros/add-label-separator',
@@ -389,6 +454,7 @@
 					AppointmentCountAttr,
 					AppointmentStartTimeAttr,
 					AppointmentEndTimeAttr,
+					AppointmentDurationAttr,
 				);
 
 				return types;
